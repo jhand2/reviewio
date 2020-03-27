@@ -11,12 +11,13 @@ from github import Github, UnknownObjectException, NamedUser
 
 def extract_reviewers(pull_request, extract_weight):
     sources = [
-        set([rev.user for rev in pull_request.get_reviews() if rev.state in ['APPROVED', 'REQUEST_CHANGES']]),
-        set([rev for rev in pull_request.get_review_requests()[0] if isinstance(rev, NamedUser.NamedUser)]),
-        set([rev for rev in pull_request.get_review_requests()[1] if isinstance(rev, NamedUser.NamedUser)])
+        set([rev.user for rev in pull_request.get_reviews()]),
+        set([rev.user for rev in pull_request.get_issue_comments()]),
+        set([rev.user for rev in pull_request.get_review_comments()])
     ]
+
     points = extract_weight(pull_request)
-    return {user: points for user in reduce(set.union, sources)}
+    return {user: points for user in reduce(set.union, sources) if user.login != pull_request.user.login}
 
 
 def extract_complex(pull_request):
